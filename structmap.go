@@ -7,8 +7,7 @@ import (
 )
 
 func structToString(v reflect.Value) map[string]interface{} {
-	res := make(map[string]interface{})
-
+	res := make(map[string]interface{}, 1)
 	for i := 0; i < v.NumField(); i++ {
 		key := strings.ToLower(v.Type().Field(i).Name)
 		val := v.Field(i).Interface()
@@ -21,9 +20,17 @@ func structToString(v reflect.Value) map[string]interface{} {
 	}
 	return res
 }
+func structToStringSlice(v reflect.Value) []map[string]interface{} {
+	res := make([]map[string]interface{}, v.Len())
+	len := v.Len()
+	for i := 0; i < len; i++ {
+		res[i] = structToString(v.Index(i))
+	}
+	return res
+}
 
 func structToMap(v reflect.Value) map[string]interface{} {
-	res := make(map[string]interface{})
+	res := make(map[string]interface{}, 1)
 
 	for i := 0; i < v.NumField(); i++ {
 		key := strings.ToLower(v.Type().Field(i).Name)
@@ -62,7 +69,11 @@ func toString(v interface{}) interface{} {
 	} else if reflect.TypeOf(v).Name() == "bool" {
 		return v.(bool)
 	} else {
-		return structToString(reflect.ValueOf(v))
+		if reflect.TypeOf(v).Kind().String() == "slice" {
+			return structToStringSlice(reflect.ValueOf(v))
+		} else {
+			return structToString(reflect.ValueOf(v))
+		}
 	}
 
 }
