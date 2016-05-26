@@ -9,7 +9,10 @@ import (
 func structToString(v reflect.Value) map[string]interface{} {
 	res := make(map[string]interface{}, 1)
 	for i := 0; i < v.NumField(); i++ {
-		key := strings.ToLower(v.Type().Field(i).Name)
+		key := v.Type().Field(i).Tag.Get("json")
+		if key == "" {
+			key = v.Type().Field(i).Name
+		}
 		val := v.Field(i).Interface()
 		if val == nil {
 			val = nil
