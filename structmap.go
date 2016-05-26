@@ -40,6 +40,10 @@ func structToStringSlice(v reflect.Value) []map[string]interface{} {
 func structToMap(v reflect.Value) map[string]interface{} {
 	res := make(map[string]interface{}, 1)
 
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
 	for i := 0; i < v.NumField(); i++ {
 		key := strings.ToLower(v.Type().Field(i).Name)
 		val := v.Field(i).Interface()
