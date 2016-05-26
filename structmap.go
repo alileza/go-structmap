@@ -8,6 +8,11 @@ import (
 
 func structToString(v reflect.Value) map[string]interface{} {
 	res := make(map[string]interface{}, 1)
+
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
 	for i := 0; i < v.NumField(); i++ {
 		key := v.Type().Field(i).Tag.Get("json")
 		if key == "" {
