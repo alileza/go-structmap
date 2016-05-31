@@ -20,7 +20,10 @@ func structToString(v reflect.Value) map[string]interface{} {
 
 		if key == "" {
 			key = v.Type().Field(i).Name
+		} else if key == "-" {
+			continue
 		}
+
 		val := v.Field(i).Interface()
 		if val == nil {
 			val = nil
