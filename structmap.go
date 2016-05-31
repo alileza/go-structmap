@@ -1,9 +1,11 @@
 package structmap
 
 import (
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func structToString(v reflect.Value) map[string]interface{} {
@@ -15,12 +17,16 @@ func structToString(v reflect.Value) map[string]interface{} {
 
 	for i := 0; i < v.NumField(); i++ {
 		key := v.Type().Field(i).Tag.Get("json")
+
 		if key == "" {
 			key = v.Type().Field(i).Name
 		}
 		val := v.Field(i).Interface()
 		if val == nil {
 			val = nil
+		} else if reflect.TypeOf(val).Name() == "Time" {
+			format := v.Type().Field(i).Tag.Get("time_format")
+			val = timeToString(val, format)
 		} else if reflect.TypeOf(val).Name() != "string" {
 			val = toString(val)
 		}
@@ -45,7 +51,10 @@ func structToMap(v reflect.Value) map[string]interface{} {
 	}
 
 	for i := 0; i < v.NumField(); i++ {
-		key := strings.ToLower(v.Type().Field(i).Name)
+		key := v.Type().Field(i).Tag.Get("json")
+		if key == "" {
+			key = v.Type().Field(i).Name
+		}
 		val := v.Field(i).Interface()
 		if val == nil {
 			val = nil
@@ -56,6 +65,7 @@ func structToMap(v reflect.Value) map[string]interface{} {
 }
 
 func StructToMap(s interface{}, opts ...bool) map[string]interface{} {
+
 	if len(opts) > 0 && opts[0] {
 		return structToString(reflect.ValueOf(s))
 	}
@@ -63,6 +73,7 @@ func StructToMap(s interface{}, opts ...bool) map[string]interface{} {
 }
 
 func toString(v interface{}) interface{} {
+	log.Println(reflect.TypeOf(v).Name())
 
 	if reflect.TypeOf(v).Name() == "int" {
 		return strconv.Itoa(v.(int))
@@ -88,4 +99,39 @@ func toString(v interface{}) interface{} {
 		}
 	}
 
+}
+
+func timeToString(v interface{}, format string) string {
+	if format != "" {
+		return convertDateTime(v.(time.Time), format)
+	}
+	return v.(time.Time).String()
+
+}
+
+// ConvertDateTime not yet implemented, need to see the performance first
+func convertDateTime(t time.Time, form string) string {
+
+	//map for parsing
+	r := strings.NewReplacer(
+		"YYYY", "2006",
+		"MMMM", "January",
+		"MMM", "Jan",
+		"MM", "01",
+		"M", "1",
+		"DDDD", "Mon",
+		"DD", "02",
+		"D", "2",
+		"HH24", "15",
+		"HH", "03",
+		"H", "3",
+		"NN", "04",
+		"N", "4",
+		"SS", "05",
+		"S", "5",
+		"AMPM", "PM",
+		"ampm", "pm",
+	)
+
+	return t.Format(r.Replace(form))
 }
