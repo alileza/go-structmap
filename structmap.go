@@ -105,11 +105,14 @@ func toString(v interface{}) interface{} {
 }
 
 func timeToString(v interface{}, format string) string {
+	if v.(time.Time).IsZero() {
+		return ""
+	}
+
 	if format != "" {
 		return convertDateTime(v.(time.Time), format)
 	}
 	return v.(time.Time).String()
-
 }
 
 // ConvertDateTime not yet implemented, need to see the performance first
