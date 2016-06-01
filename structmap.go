@@ -1,7 +1,6 @@
 package structmap
 
 import (
-	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -76,8 +75,6 @@ func StructToMap(s interface{}, opts ...bool) map[string]interface{} {
 }
 
 func toString(v interface{}) interface{} {
-	log.Println(reflect.TypeOf(v).Name())
-
 	if reflect.TypeOf(v).Name() == "int" {
 		return strconv.Itoa(v.(int))
 	} else if reflect.TypeOf(v).Name() == "int8" {
